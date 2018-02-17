@@ -4,11 +4,13 @@ const btoa = require('btoa');
 const axios = require('axios');
 const config = require('./config');
 const queryString = require('query-string')
+const uuid = require('uuid/v5');
 
-let base = config.REQUEST_TOKEN_BASE;
+let REQUEST_TOKEN_BASE = config.REQUEST_TOKEN_BASE;
+let REQUEST_AUTHORIZATION_BASE = config.REQUEST_AUTHORIZATION_BASE;
 
-let key = config.KEY;
-let secret = config.SECRET;
+let KEY = config.KEY;
+let SECRET = config.SECRET;
 
 function sortObject(o) {        
     var sorted = {}, key, a = [];
@@ -37,31 +39,70 @@ function genQueryString(input_params) {
     return query_string.substring(0, query_string.length - 1);
 }
 
-crypto.randomBytes(16, function(err, buffer) {      
-    const nonce = buffer.toString('hex');
-    const timestamp = (Math.floor(new Date() / 1000));
-    
-    var default_params = {};
-    default_params["consumer_key"] = key;
-    default_params["nonce"] = nonce;
-    default_params["signature_method"] = "HMAC-SHA1";
-    default_params["timestamp"] = timestamp;
-    default_params["version"] = "1.0";
-    default_params["callback"] = "";
+function getDefaultParams() {
+    return {
+        nonce: crypto.randomBytes(16).toString('hex'),
+        timestamp: Math.floor(new Date() / 1000),
+        consumer_key: KEY,
+        signature_method: "HMAC-SHA1",
+        version: "1.0",
+        callback: "",
+    }
+}
 
-    var additional_params = {};
-    var baseString = "GET&" + require("querystring").escape(base) + "&" + require("querystring").escape(genQueryString(Object.assign(default_params, additional_params)));
-    var oAuthSecret = secret + "&"
+function getBaseString(arr) {
+    const arr1 = arr.map(x => require("querystring").escape(x))
+    return arr1.join('&');
+}
+
+function getBaseSrtingSignature(baseString, oAuthSecret) {
     var hmac = CryptoJS.HmacSHA1(baseString, oAuthSecret);
-    oauth_signature = encodeURIComponent(CryptoJS.HmacSHA1(baseString, oAuthSecret).toString(CryptoJS.enc.Base64));
-    default_params["signature"] = oauth_signature;
-    var request_url = base + "?" + genQueryString(default_params);
+    var oauth_signature = encodeURIComponent(CryptoJS.HmacSHA1(baseString, oAuthSecret).toString(CryptoJS.enc.Base64));
+    return oauth_signature;
+}
+
+
+function getAuthorizationURL(token) {
+    var default_params = getDefaultParams();
+    default_params["oauth_token"] = token.oauth_token
+    var baseString = getBaseString(['GET', REQUEST_AUTHORIZATION_BASE, genQueryString(default_params)])
+    var oAuthSecret = SECRET + "&" + token.oauth_token_secret;
+    
+    default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+
+    var request_url = REQUEST_AUTHORIZATION_BASE + "?" + genQueryString(default_params);
+    console.log(request_url)
+    // axios.get(request_url).then(function({ status, data }){
+    //     const token = queryString.parse(data)
+    //     console.log(token, data)
+    // }).catch(function (error) {
+    //     console.log(error);
+    // });
+}
+
+function getToken() {
+    var default_params = getDefaultParams();
+    var additional_params = {};
+
+    // var baseString = "GET&" + require("querystring").escape(base) + "&" + require("querystring").escape(genQueryString(Object.assign(default_params, additional_params)));
+
+    var baseString = getBaseString(["GET", REQUEST_TOKEN_BASE, genQueryString(Object.assign(default_params, additional_params))]);
+    var oAuthSecret = SECRET + "&"
+    
+    default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+
+    var request_url = REQUEST_TOKEN_BASE + "?" + genQueryString(default_params);
 
     axios.get(request_url).then(function({ status, data }){
         const token = queryString.parse(data)
         console.log(token, data)
-    })
-    .catch(function (error) {
+        console.log('Fetching Auth url')
+        getAuthorizationURL(token)
+    }).catch(function (error) {
         console.log(error);
     });
-});
+};
+
+
+
+getToken();
