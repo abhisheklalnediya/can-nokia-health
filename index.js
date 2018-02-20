@@ -46,7 +46,6 @@ function getDefaultParams() {
         consumer_key: KEY,
         signature_method: "HMAC-SHA1",
         version: "1.0",
-        callback: "",
     }
 }
 
@@ -64,7 +63,7 @@ function getBaseSrtingSignature(baseString, oAuthSecret) {
 
 function getAuthorizationURL(token) {
     var default_params = getDefaultParams();
-    default_params["oauth_token"] = token.oauth_token
+    default_params["token"] = token.oauth_token
     var baseString = getBaseString(['GET', REQUEST_AUTHORIZATION_BASE, genQueryString(default_params)])
     var oAuthSecret = SECRET + "&" + token.oauth_token_secret;
     
@@ -82,7 +81,9 @@ function getAuthorizationURL(token) {
 
 function getToken() {
     var default_params = getDefaultParams();
-    var additional_params = {};
+    var additional_params = {
+        callback: encodeURIComponent("http://cankadom.kraftvoll.in/api/nokia/")
+    };
 
     // var baseString = "GET&" + require("querystring").escape(base) + "&" + require("querystring").escape(genQueryString(Object.assign(default_params, additional_params)));
 
@@ -92,7 +93,7 @@ function getToken() {
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
 
     var request_url = REQUEST_TOKEN_BASE + "?" + genQueryString(default_params);
-
+    console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
         const token = queryString.parse(data)
         console.log(token, data)
