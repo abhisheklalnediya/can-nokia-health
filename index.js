@@ -102,7 +102,7 @@ function getToken() {
     //console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
         const token = queryString.parse(data)
-        console.log('Secret:', token.oauth_token_secret)
+        console.log('Secret:', token)
         getAuthorizationURL(token)
     }).catch(function (error) {
         console.log(error);
@@ -124,6 +124,7 @@ function getoauth(token, token_secret) {
     
     var oAuthSecret = SECRET + "&" + token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+    console.log(default_params)
     var request_url = config.REQUEST_ACCESS_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
 
     axios.get(request_url).then(function({ status, data }){
@@ -153,14 +154,15 @@ function getmeasure(token) {
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     //console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
-        console.log('Measures: ')
+        // console.log('Measures: ', data.body)
         // console.log(data.body.measuregrps)
         data.body.measuregrps.map(x => {
             const d = moment(x.date * 1000).format('llll')
             let v = null
+            console.log(x.grpid)
             x.measures.map(y => {
                 if(y.type === 12) {
-                    console.log(y)
+                    console.log(y.value)
                     v = y.value * Math.pow(10, y.unit)
                     //v = v - 273.15
                 }
