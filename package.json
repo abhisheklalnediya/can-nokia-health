@@ -4,7 +4,7 @@
   "description": "Utilities for connecting to nokia api and reading health measures. Part of cankado project.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --ignore db.json index.js --exec babel-node --presets es2015,stage-2",
+    "start": "nodemon --ignore db.json src/index.js --exec babel-node --presets es2015,stage-2",
     "build": "babel src  --presets es2015,stage-2 -d dist",
     "serve": "node dist/index.js",
     "test": "mocha --compilers js:babel-register"

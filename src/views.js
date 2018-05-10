@@ -9,8 +9,8 @@ setTimeout(()=>{
 
 
 
-export const getAuthUrl = (req, res) => {
-    var cankado_user = config.CANKADO_USER;
+export const getAuthUrl = (req, res, cankado_user) => {
+    // var cankado_user = config.CANKADO_USER;
     var token = getToken(cankado_user , ({url, token})=>{
         res.send(`Got to ${url}`)
 
