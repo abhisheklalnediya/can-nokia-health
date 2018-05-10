@@ -4,7 +4,10 @@
   "description": "Utilities for connecting to nokia api and reading health measures. Part of cankado project.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --ignore db.json index.js --exec babel-node --presets es2015,stage-2",
+    "build": "babel lib -d dist",
+    "serve": "node dist/index.js",
+    "test": "mocha --compilers js:babel-register"
   },
   "repository": {
     "type": "git",
@@ -26,9 +29,23 @@
     "axios": "^0.17.1",
     "btoa": "^1.1.2",
     "crypto-js": "^3.1.9-1",
+    "express": "^4.16.3",
+    "lokijs": "^1.5.3",
     "moment": "^2.20.1",
     "query-string": "^5.1.0",
     "request": "^2.83.0",
     "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-2": "^6.11.0",
+    "babel-register": "^6.11.6",
+    "mocha": "^3.0.1",
+    "nodemon": "^1.10.0"
+  },
+  "nodemonConfig": {
+    "ignore": ["db.json"],
+    "delay": "2500"
   }
 }
