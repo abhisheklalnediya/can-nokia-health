@@ -1,12 +1,26 @@
 import axios from 'axios';
+import { Client } from 'pg';
+import uuid from 'uuid/v4'; 
+import moment from 'moment';
 import { getToken, getAccessToken, getMeasure } from './nokia';
 import config from './config';
 import DB from './db';
 
 let DB_AUTHS = null;
+
 setTimeout(()=>{
     DB_AUTHS = DB.getCollection('search');
 }, 3000)
+
+
+const client = new Client({
+    user: 'postgres',
+    host: 'ssh.kraftvoll.co',
+    database: 'cankadoREST',
+    password: '123456',
+    port: 5432,
+  })
+  client.connect()
 
 export const getAuthUrl = (req, res, cankado_user) => {
     // var cankado_user = config.CANKADO_USER;
@@ -49,10 +63,25 @@ export const getDataToken = (req, res, cankado_user) => {
     });
 }
 
+function updateDB(cankado_user, {timezone, results}) {
+    results.map(r => {
+        const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
+        const { value } = r;
+        client.query(
+            `insert into  nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values (TIMESTAMP '$1', $2, '$3', '$4', 't');`,
+            [dateTime, value, cankado_user, uuid()], (err, res) => {
+            console.log(err ? err.stack : 'Inserted')
+        })
+    })
+    
+}
+
 export const getTemperature = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
     console.log(user)
     const{ access_token, access_token_secret, nokia_user } = user
-    getMeasure({access_token, access_token_secret, userid: nokia_user})
-    res.send(`OK`);
+    getMeasure({access_token, access_token_secret, userid: nokia_user}, (v)=>{
+        updateDB(cankado_user, v)
+    })
+    res.send(`UPDATING DB`);
 }

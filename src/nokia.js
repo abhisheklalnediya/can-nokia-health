@@ -142,7 +142,7 @@ export function getAccessToken(token, token_secret, successCallback) {
 }
 
 
-export function getMeasure(token) {
+export function getMeasure(token, successCallback) {
     console.log(token)
     var default_params = getDefaultParams();
     var additional_params = {
@@ -159,20 +159,24 @@ export function getMeasure(token) {
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     axios.get(request_url).then(function({ status, data }){
         console.log(status, data)
+        const results = []
+        console.log(data.body)
         data.body.measuregrps.map(x => {
-            const d = moment(x.date * 1000).format('llll')
             let v = null
-            console.log(x.grpid)
+            //console.log(x.grpid)
             x.measures.map(y => {
                 if(y.type === 12) {
-                    console.log(y.value)
                     v = y.value * Math.pow(10, y.unit)
                 }
             })
             if(v){
-                console.log(d, v)
+                results.push({dateTime: x.date, value: v})
             }
         })
+        successCallback({
+            timezone: data.body.timezone,
+            results
+        });
         //notification(token)
     }).catch(function (error) {
         console.log(error);
