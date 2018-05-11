@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { getToken, getAccessToken, getMeasure } from './nokia';
 import config from './config';
 import DB from './db';
@@ -7,24 +8,20 @@ setTimeout(()=>{
     DB_AUTHS = DB.getCollection('search');
 }, 3000)
 
-
-
 export const getAuthUrl = (req, res, cankado_user) => {
     // var cankado_user = config.CANKADO_USER;
     var token = getToken(cankado_user , ({url, token})=>{
-        res.send(`Got to ${url}`)
-
         let user = DB_AUTHS.findOne({cankado_user})
-        if(!user) { 
-            user = DB_AUTHS.insert({cankado_user}) 
+        if(!user) {
+            user = DB_AUTHS.insert({cankado_user});
         }
         DB_AUTHS.update({...user, ...token, cankado_user})
         var results = DB_AUTHS.find();
-        console.log(results);
+        res.redirect(url)
     }, () => {
         res.status(400);
         res.send('Error');
-    });    
+    });
 }
 
 export const getDataToken = (req, res, cankado_user) => {
@@ -38,22 +35,24 @@ export const getDataToken = (req, res, cankado_user) => {
     });
 
     getAccessToken(oauth_token, user.oauth_token_secret, ({oauth_token, oauth_token_secret})=>{
-    //    DB_AUTHS.update({...results, })
         DB_AUTHS.update({
             ...user,
             access_token: oauth_token,
             access_token_secret: oauth_token_secret,
         })
+        axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
+            console.log(d)
+            res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+        }).catch(() => {
+            res.send('NOT OK')
+        })
     });
-    res.send(`OK`);
 }
 
 export const getTemperature = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
     console.log(user)
-    // var results = DB_AUTHS.find();
-    // console.log(results);
-    const{ access_token, access_token_secret, nokia_user } = user 
+    const{ access_token, access_token_secret, nokia_user } = user
     getMeasure({access_token, access_token_secret, userid: nokia_user})
     res.send(`OK`);
 }
