@@ -1,5 +1,5 @@
 import { stat } from 'fs';
-
+import _ from 'lodash';
 const crypto = require('crypto');
 const CryptoJS = require("crypto-js");
 const btoa = require('btoa');
@@ -33,7 +33,7 @@ function sortObject(o) {
 
 function genQueryString(input_params) {
     var params = sortObject(input_params);
-    var query_string = "";
+    var query_string = [];
     for ( var param in params ) {
         if (    param.indexOf("action") == -1 && 
                 param.indexOf("user_id") == -1 && 
@@ -41,16 +41,19 @@ function genQueryString(input_params) {
                 //param.indexOf("comment") == -1 && 
                 //param.indexOf("appli") == -1 && 
                 param.indexOf("start") == -1 && 
+                param.indexOf("lastupdate") == -1 && 
                 param.indexOf("end") == -1 //&& 
                 //param.indexOf("type") == -1 //&&
                 //param.indexOf("meastype") == -1 
             ) { 
-            query_string += "oauth_" + param + "=" + params[param] + "&"; 
+            query_string.push("oauth_" + param + "=" + params[param]); 
         } else {
-            query_string += param + "=" + params[param] + "&";
+            query_string.push(param + "=" + params[param]);
         } 
     }
-    return query_string.substring(0, query_string.length - 1);
+    query_string = query_string.sort().join('&')
+    console.log(query_string)
+    return query_string
 }
 
 function getDefaultParams() {
@@ -114,10 +117,6 @@ export function getToken(cankado_user ,successCallback, errorCallback) {
     return authUrl;
 };
 
-
-
-
-
 export function getAccessToken(token, token_secret, successCallback) {
     var default_params = getDefaultParams();
     var additional_params = {
@@ -143,7 +142,6 @@ export function getAccessToken(token, token_secret, successCallback) {
 
 
 export function getMeasure(token, successCallback) {
-    console.log(token)
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -151,16 +149,18 @@ export function getMeasure(token, successCallback) {
         action: 'getmeas',
         meastype: '12'
     };
-
+    if(token.lastupdate){
+        additional_params.lastupdate = token.lastupdate
+    }
     var baseString = getBaseString(["GET", config.REQUEST_TEMP_TOKEN_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
+    console.log(request_url);
     axios.get(request_url).then(function({ status, data }){
-        console.log(status, data)
         const results = []
-        console.log(data.body)
+        console.log(data)
         data.body.measuregrps.map(x => {
             let v = null
             //console.log(x.grpid)
@@ -183,20 +183,18 @@ export function getMeasure(token, successCallback) {
     });
 }
 
-function notification(token, action) {
+function setNotification(token) {
     var default_params = getDefaultParams();
     var additional_params = {
-        token: token.oauth_token,
+        token: token.access_token,
         userid: token.userid,
         action: 'subscribe',
-        callbackurl: encodeURIComponent(config.CANKADO_NOTIFY + config.CANKADO_USER + '/'),
+        callbackurl: encodeURIComponent(config.CANKADO_NOTIFY + token.cankado_user + '/'),
         comment: 'test',
         //appli: 12
     };
-
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
-    
-    var oAuthSecret = SECRET + "&" + token.oauth_token_secret
+    var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     console.log(request_url)

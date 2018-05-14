@@ -2,10 +2,10 @@ import axios from 'axios';
 import { Client } from 'pg';
 import uuid from 'uuid/v4'; 
 import moment from 'moment';
-import { getToken, getAccessToken, getMeasure } from './nokia';
+import { getToken, getAccessToken, getMeasure, setNotification } from './nokia';
 import config from './config';
 import DB from './db';
-
+import _ from 'lodash';
 let DB_AUTHS = null;
 
 setTimeout(()=>{
@@ -15,7 +15,7 @@ setTimeout(()=>{
 
 const client = new Client({
     user: 'postgres',
-    host: 'ssh.kraftvoll.co',
+    host: 'iapi.kraftvoll.co',
     database: 'cankadoREST',
     password: '123456',
     port: 5432,
@@ -53,9 +53,11 @@ export const getDataToken = (req, res, cankado_user) => {
             ...user,
             access_token: oauth_token,
             access_token_secret: oauth_token_secret,
+
         })
         axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
-            console.log(d)
+            const{ access_token, access_token_secret, nokia_user, cankado_user } = user
+            setNotification({access_token, access_token_secret, userid: nokia_user, cankado_user})
             res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
         }).catch(() => {
             res.send('NOT OK')
@@ -65,23 +67,30 @@ export const getDataToken = (req, res, cankado_user) => {
 
 function updateDB(cankado_user, {timezone, results}) {
     results.map(r => {
+        console.log(r.dateTime);
         const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
         const { value } = r;
+        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\');`
         client.query(
-            `insert into  nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values (TIMESTAMP '$1', $2, '$3', '$4', 't');`,
-            [dateTime, value, cankado_user, uuid()], (err, res) => {
+            q,[],
+            (err, res) => {
             console.log(err ? err.stack : 'Inserted')
         })
     })
+    
     
 }
 
 export const getTemperature = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
     console.log(user)
-    const{ access_token, access_token_secret, nokia_user } = user
-    getMeasure({access_token, access_token_secret, userid: nokia_user}, (v)=>{
+    const{ access_token, access_token_secret, nokia_user, lastupdate } = user
+    getMeasure({access_token, access_token_secret, userid: nokia_user, lastupdate}, (v)=>{
         updateDB(cankado_user, v)
+        DB_AUTHS.update({
+            ...user, 
+            lastupdate: _.maxBy(v.results, 'dateTime').dateTime
+        })
     })
     res.send(`UPDATING DB`);
 }
