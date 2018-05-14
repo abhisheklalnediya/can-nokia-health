@@ -31,7 +31,7 @@ export const getAuthUrl = (req, res, cankado_user) => {
         }
         console.log(user)
         DB_AUTHS.update({...user, ...token, cankado_user})
-        console.log({...user, ...token, cankado_user});
+        console.log('KKKKKKK', {...user, ...token, cankado_user});
         var results = DB_AUTHS.find();
         res.redirect(url)
     }, () => {
@@ -49,7 +49,7 @@ export const getDataToken = (req, res, cankado_user) => {
         user_token_verifier: oauth_verifier,
         nokia_user: userid
     });
-
+    console.log('UUU', user)
     getAccessToken(oauth_token, user.oauth_token_secret, ({oauth_token, oauth_token_secret})=>{
         DB_AUTHS.update({
             ...user,
@@ -57,11 +57,12 @@ export const getDataToken = (req, res, cankado_user) => {
             access_token_secret: oauth_token_secret,
 
         })
+        console.log('PPPP', oauth_token, oauth_token_secret)
         axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
             const{ oauth_token, oauth_token_secret, nokia_user, cankado_user } = user
-            setNotification({oauth_token, oauth_token_secret, userid: nokia_user, cankado_user})
-            //res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
-          res.send(' OK')
+            setNotification({access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user})
+            res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+          // res.send(' OK')
         }).catch((e) => {
             console.log(e)
             res.send('NOT OK')
