@@ -24,12 +24,14 @@ const client = new Client({
 
 export const getAuthUrl = (req, res, cankado_user) => {
     // var cankado_user = config.CANKADO_USER;
-    var token = getToken(cankado_user , ({url, token})=>{
+    getToken(cankado_user , ({url, token})=>{
         let user = DB_AUTHS.findOne({cankado_user})
         if(!user) {
             user = DB_AUTHS.insert({cankado_user});
         }
+        console.log(user)
         DB_AUTHS.update({...user, ...token, cankado_user})
+        console.log({...user, ...token, cankado_user});
         var results = DB_AUTHS.find();
         res.redirect(url)
     }, () => {
