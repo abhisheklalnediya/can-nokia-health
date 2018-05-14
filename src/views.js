@@ -56,8 +56,8 @@ export const getDataToken = (req, res, cankado_user) => {
 
         })
         axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
-            const{ access_token, access_token_secret, nokia_user, cankado_user } = user
-            setNotification({access_token, access_token_secret, userid: nokia_user, cankado_user})
+            const{ oauth_token, oauth_token_secret, nokia_user, cankado_user } = user
+            setNotification({oauth_token, oauth_token_secret, userid: nokia_user, cankado_user})
             //res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
           res.send(' OK')
         }).catch((e) => {
