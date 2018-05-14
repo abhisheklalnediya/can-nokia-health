@@ -58,8 +58,10 @@ export const getDataToken = (req, res, cankado_user) => {
         axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
             const{ access_token, access_token_secret, nokia_user, cankado_user } = user
             setNotification({access_token, access_token_secret, userid: nokia_user, cankado_user})
-            res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
-        }).catch(() => {
+            //res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+          res.send(' OK')
+        }).catch((e) => {
+            console.log(e)
             res.send('NOT OK')
         })
     });
@@ -88,9 +90,9 @@ export const getTemperature = (req, res, cankado_user) => {
     getMeasure({access_token, access_token_secret, userid: nokia_user, lastupdate}, (v)=>{
         updateDB(cankado_user, v)
         DB_AUTHS.update({
-            ...user, 
+            ...user,
             lastupdate: _.maxBy(v.results, 'dateTime').dateTime
         })
     })
-    res.send(`UPDATING DB`);
+    res.send(`UPDATING DB ${new Date().getTime()}`);
 }

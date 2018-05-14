@@ -1,3 +1,4 @@
+
 import { stat } from 'fs';
 import _ from 'lodash';
 const crypto = require('crypto');
@@ -51,7 +52,7 @@ function genQueryString(input_params) {
             query_string.push(param + "=" + params[param]);
         } 
     }
-    query_string = query_string.sort().join('&')
+    query_string = query_string.join('&')
     console.log(query_string)
     return query_string
 }
@@ -183,16 +184,19 @@ export function getMeasure(token, successCallback) {
     });
 }
 
-function setNotification(token) {
+export function setNotification(token) {
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
         userid: token.userid,
         action: 'subscribe',
-        callbackurl: encodeURIComponent(config.CANKADO_NOTIFY + token.cankado_user + '/'),
+        callbackurl: encodeURIComponent(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/'),
+
         comment: 'test',
         //appli: 12
     };
+    console.log(additional_params)
+    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
