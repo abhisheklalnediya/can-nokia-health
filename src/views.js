@@ -23,15 +23,12 @@ const client = new Client({
   client.connect()
 
 export const getAuthUrl = (req, res, cankado_user) => {
-    // var cankado_user = config.CANKADO_USER;
     getToken(cankado_user , ({url, token})=>{
         let user = DB_AUTHS.findOne({cankado_user})
         if(!user) {
             user = DB_AUTHS.insert({cankado_user});
         }
-        console.log(user)
         DB_AUTHS.update({...user, ...token, cankado_user})
-        console.log('KKKKKKK', {...user, ...token, cankado_user});
         var results = DB_AUTHS.find();
         res.redirect(url)
     }, () => {
@@ -43,13 +40,16 @@ export const getAuthUrl = (req, res, cankado_user) => {
 export const getDataToken = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
     const { oauth_token, oauth_verifier, userid} = req.query;
+    if(!userid) {
+        res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+        return;
+    }
     user = DB_AUTHS.update({
         ...user,
         user_token: oauth_token,
         user_token_verifier: oauth_verifier,
         nokia_user: userid
     });
-    console.log('UUU', user)
     getAccessToken(oauth_token, user.oauth_token_secret, ({oauth_token, oauth_token_secret})=>{
         DB_AUTHS.update({
             ...user,
@@ -57,7 +57,6 @@ export const getDataToken = (req, res, cankado_user) => {
             access_token_secret: oauth_token_secret,
 
         })
-        console.log('PPPP', oauth_token, oauth_token_secret)
         axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
             const{ nokia_user, cankado_user } = user
             setNotification({access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user})
@@ -79,8 +78,7 @@ function updateDB(cankado_user, {timezone, results}) {
             const { value } = r;
             inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
         })
-        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"`
-        console.log(q)
+        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"`;
         client.query(
             q,[],
             (err, res) => {
@@ -91,7 +89,6 @@ function updateDB(cankado_user, {timezone, results}) {
 
 export const getTemperature = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
-    console.log(user)
     const{ access_token, access_token_secret, nokia_user, lastupdate } = user
     getMeasure({access_token, access_token_secret, userid: nokia_user, lastupdate}, (v)=>{
         updateDB(cankado_user, v)

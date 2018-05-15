@@ -1,4 +1,3 @@
-
 import { stat } from 'fs';
 import _ from 'lodash';
 const crypto = require('crypto');
@@ -53,7 +52,6 @@ function genQueryString(input_params) {
         } 
     }
     query_string = query_string.join('&')
-    console.log(query_string)
     return query_string
 }
 
@@ -158,16 +156,12 @@ export function getMeasure(token, successCallback) {
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url);
     axios.get(request_url).then(function({ status, data }){
         const results = []
-        console.log(data)
         data.body.measuregrps.map(x => {
             let v = null
-            //console.log(x.grpid)
             x.measures.map(y => {
                 if(y.type === 71) {
-                    console.log(x.date, y)
                     v = y.value * Math.pow(10, y.unit)
                 }
             })
@@ -195,15 +189,11 @@ export function setNotification(token) {
         comment: 'test',
         //appli: 12
     };
-    console.log(additional_params)
-    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
-        console.log('NOTIFYYYYY', data)
     }).catch(function (error) {
         console.log(error);
     });
@@ -211,7 +201,6 @@ export function setNotification(token) {
 
 
 export function listNotification(token) {
-    console.log(token)
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -219,15 +208,11 @@ export function listNotification(token) {
         action: 'list',
         //appli: 12
     };
-    console.log(additional_params)
-    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
-        console.log('LISTTTTTTTT', data)
     }).catch(function (error) {
         console.log(error);
     });
