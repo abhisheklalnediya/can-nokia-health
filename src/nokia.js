@@ -186,6 +186,7 @@ export function getMeasure(token, successCallback) {
 
 export function setNotification(token) {
     console.log(token)
+    listNotification(token)
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -209,6 +210,31 @@ export function setNotification(token) {
         console.log(error);
     });
 }
+
+
+export function listNotification(token) {
+    console.log(token)
+    var default_params = getDefaultParams();
+    var additional_params = {
+        token: token.access_token,
+        userid: token.userid,
+        action: 'list',
+        //appli: 12
+    };
+    console.log(additional_params)
+    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
+    var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
+    var oAuthSecret = SECRET + "&" + token.access_token_secret
+    default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+    var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
+    console.log(request_url)
+    axios.get(request_url).then(function({ status, data }){
+        console.log('LIST', data)
+    }).catch(function (error) {
+        console.log(error);
+    });
+}
+
 
 //getToken();
 //console.log(process.argv)
