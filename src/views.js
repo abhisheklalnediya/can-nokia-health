@@ -78,7 +78,7 @@ function updateDB(cankado_user, {timezone, results}) {
             const { value } = r;
             inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
         })
-        const q = `delete from nokia_nokiareading; insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')};`
+        const q = `delete from nokia_nokiareading where patient_id = \'${cankado_user}\'; insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')};`
         console.log(q)
         client.query(
             q,[],
