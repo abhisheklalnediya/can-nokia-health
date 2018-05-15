@@ -185,6 +185,7 @@ export function getMeasure(token, successCallback) {
 }
 
 export function setNotification(token) {
+    console.log(token)
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
