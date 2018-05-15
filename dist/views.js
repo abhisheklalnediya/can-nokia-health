@@ -103,6 +103,7 @@ var getDataToken = exports.getDataToken = function getDataToken(req, res, cankad
 
             (0, _nokia.setNotification)({ access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user: cankado_user });
             res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+            //res.send('OK');
         }).catch(function (e) {
             console.log(e);
             res.send('NOT OK');
@@ -123,7 +124,7 @@ function updateDB(cankado_user, _ref3) {
 
             inserts.push(' (TIMESTAMP \'' + dateTime + '\', ' + value + ', \'' + cankado_user + '\', \'' + String((0, _v2.default)()) + '\', \'t\')');
         });
-        var q = 'delete from nokia_nokiareading; insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ' + inserts.join(',') + ';';
+        var q = 'insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ' + inserts.join(',') + '; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"';
         console.log(q);
         client.query(q, [], function (err, res) {
             console.log(err ? err.stack : 'Inserted');

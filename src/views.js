@@ -62,6 +62,7 @@ export const getDataToken = (req, res, cankado_user) => {
             const{ nokia_user, cankado_user } = user
             setNotification({access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user})
             res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+            //res.send('OK');
         }).catch((e) => {
             console.log(e)
             res.send('NOT OK')
@@ -78,7 +79,7 @@ function updateDB(cankado_user, {timezone, results}) {
             const { value } = r;
             inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
         })
-        const q = `delete from nokia_nokiareading where patient_id = \'${cankado_user}\'; insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')};`
+        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"`
         console.log(q)
         client.query(
             q,[],

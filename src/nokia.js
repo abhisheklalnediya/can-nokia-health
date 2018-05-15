@@ -148,7 +148,7 @@ export function getMeasure(token, successCallback) {
         token: token.access_token,
         userid: token.userid,
         action: 'getmeas',
-        meastype: '12'
+        meastype: '71'
     };
     // if(token.lastupdate){
     //     additional_params.lastupdate = token.lastupdate
@@ -166,7 +166,8 @@ export function getMeasure(token, successCallback) {
             let v = null
             //console.log(x.grpid)
             x.measures.map(y => {
-                if(y.type === 12) {
+                if(y.type === 71) {
+                    console.log(x.date, y)
                     v = y.value * Math.pow(10, y.unit)
                 }
             })
@@ -185,8 +186,6 @@ export function getMeasure(token, successCallback) {
 }
 
 export function setNotification(token) {
-    console.log(token)
-    listNotification(token)
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -204,7 +203,7 @@ export function setNotification(token) {
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
-        console.log(data)
+        console.log('NOTIFYYYYY', data)
     }).catch(function (error) {
         console.log(error);
     });
@@ -228,7 +227,7 @@ export function listNotification(token) {
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     console.log(request_url)
     axios.get(request_url).then(function({ status, data }){
-        console.log('LIST', data)
+        console.log('LISTTTTTTTT', data)
     }).catch(function (error) {
         console.log(error);
     });

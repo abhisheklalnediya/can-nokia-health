@@ -167,7 +167,7 @@ function getMeasure(token, successCallback) {
         token: token.access_token,
         userid: token.userid,
         action: 'getmeas',
-        meastype: '12'
+        meastype: '71'
     };
     // if(token.lastupdate){
     //     additional_params.lastupdate = token.lastupdate
@@ -188,7 +188,8 @@ function getMeasure(token, successCallback) {
             var v = null;
             //console.log(x.grpid)
             x.measures.map(function (y) {
-                if (y.type === 12) {
+                if (y.type === 71) {
+                    console.log(x.date, y);
                     v = y.value * Math.pow(10, y.unit);
                 }
             });
@@ -207,8 +208,6 @@ function getMeasure(token, successCallback) {
 }
 
 function setNotification(token) {
-    console.log(token);
-    listNotification(token);
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -229,7 +228,7 @@ function setNotification(token) {
         var status = _ref4.status,
             data = _ref4.data;
 
-        console.log(data);
+        console.log('NOTIFYYYYY', data);
     }).catch(function (error) {
         console.log(error);
     });
@@ -255,7 +254,7 @@ function listNotification(token) {
         var status = _ref5.status,
             data = _ref5.data;
 
-        console.log('LIST', data);
+        console.log('LISTTTTTTTT', data);
     }).catch(function (error) {
         console.log(error);
     });
