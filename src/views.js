@@ -71,22 +71,21 @@ export const getDataToken = (req, res, cankado_user) => {
 
 function updateDB(cankado_user, {timezone, results}) {
     if(results.length) {
-        const dq = `delete from nokia_nokiareading;`
+        let inserts = []
+        results.map(r => {
+            console.log(r.dateTime);
+            const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
+            const { value } = r;
+            inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
+        })
+        const q = `delete from nokia_nokiareading; insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')};`
+        console.log(q)
+        client.query(
+            q,[],
+            (err, res) => {
+            console.log(err ? err.stack : 'Inserted')
+        })
     }
-    let inserts = []
-    results.map(r => {
-        console.log(r.dateTime);
-        const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
-        const { value } = r;
-        inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
-    })
-    const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}`
-    console.log(q)
-    client.query(
-        q,[],
-        (err, res) => {
-        console.log(err ? err.stack : 'Inserted')
-    })
 }
 
 export const getTemperature = (req, res, cankado_user) => {
