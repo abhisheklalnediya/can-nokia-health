@@ -6,8 +6,16 @@ Object.defineProperty(exports, "__esModule", {
 exports.getToken = getToken;
 exports.getAccessToken = getAccessToken;
 exports.getMeasure = getMeasure;
+exports.setNotification = setNotification;
+exports.listNotification = listNotification;
 
 var _fs = require('fs');
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var crypto = require('crypto');
 var CryptoJS = require("crypto-js");
@@ -43,21 +51,23 @@ function sortObject(o) {
 
 function genQueryString(input_params) {
     var params = sortObject(input_params);
-    var query_string = "";
+    var query_string = [];
     for (var param in params) {
         if (param.indexOf("action") == -1 && param.indexOf("user_id") == -1 && param.indexOf("callbackurl") == -1 &&
         //param.indexOf("comment") == -1 && 
         //param.indexOf("appli") == -1 && 
-        param.indexOf("start") == -1 && param.indexOf("end") == -1 //&& 
+        param.indexOf("start") == -1 && param.indexOf("lastupdate") == -1 && param.indexOf("end") == -1 //&& 
         //param.indexOf("type") == -1 //&&
         //param.indexOf("meastype") == -1 
         ) {
-                query_string += "oauth_" + param + "=" + params[param] + "&";
+                query_string.push("oauth_" + param + "=" + params[param]);
             } else {
-            query_string += param + "=" + params[param] + "&";
+            query_string.push(param + "=" + params[param]);
         }
     }
-    return query_string.substring(0, query_string.length - 1);
+    query_string = query_string.join('&');
+    console.log(query_string);
+    return query_string;
 }
 
 function getDefaultParams() {
@@ -151,8 +161,7 @@ function getAccessToken(token, token_secret, successCallback) {
     });
 }
 
-function getMeasure(token) {
-    console.log(token);
+function getMeasure(token, successCallback) {
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -160,30 +169,36 @@ function getMeasure(token) {
         action: 'getmeas',
         meastype: '12'
     };
-
+    // if(token.lastupdate){
+    //     additional_params.lastupdate = token.lastupdate
+    // }
     var baseString = getBaseString(["GET", config.REQUEST_TEMP_TOKEN_BASE, genQueryString(Object.assign(default_params, additional_params))]);
 
     var oAuthSecret = SECRET + "&" + token.access_token_secret;
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
+    console.log(request_url);
     axios.get(request_url).then(function (_ref3) {
         var status = _ref3.status,
             data = _ref3.data;
 
-        console.log(status, data);
+        var results = [];
+        console.log(data);
         data.body.measuregrps.map(function (x) {
-            var d = moment(x.date * 1000).format('llll');
             var v = null;
-            console.log(x.grpid);
+            //console.log(x.grpid)
             x.measures.map(function (y) {
                 if (y.type === 12) {
-                    console.log(y.value);
                     v = y.value * Math.pow(10, y.unit);
                 }
             });
             if (v) {
-                console.log(d, v);
+                results.push({ dateTime: x.date, value: v });
             }
+        });
+        successCallback({
+            timezone: data.body.timezone,
+            results: results
         });
         //notification(token)
     }).catch(function (error) {
@@ -191,20 +206,22 @@ function getMeasure(token) {
     });
 }
 
-function notification(token, action) {
+function setNotification(token) {
+    console.log(token);
+    listNotification(token);
     var default_params = getDefaultParams();
     var additional_params = {
-        token: token.oauth_token,
+        token: token.access_token,
         userid: token.userid,
         action: 'subscribe',
-        callbackurl: encodeURIComponent(config.CANKADO_NOTIFY + config.CANKADO_USER + '/'),
+        callbackurl: encodeURIComponent(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/'),
         comment: 'test'
         //appli: 12
     };
-
+    console.log(additional_params);
+    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
-
-    var oAuthSecret = SECRET + "&" + token.oauth_token_secret;
+    var oAuthSecret = SECRET + "&" + token.access_token_secret;
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
     console.log(request_url);
@@ -213,6 +230,32 @@ function notification(token, action) {
             data = _ref4.data;
 
         console.log(data);
+    }).catch(function (error) {
+        console.log(error);
+    });
+}
+
+function listNotification(token) {
+    console.log(token);
+    var default_params = getDefaultParams();
+    var additional_params = {
+        token: token.access_token,
+        userid: token.userid,
+        action: 'list'
+        //appli: 12
+    };
+    console.log(additional_params);
+    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
+    var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
+    var oAuthSecret = SECRET + "&" + token.access_token_secret;
+    default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+    var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
+    console.log(request_url);
+    axios.get(request_url).then(function (_ref5) {
+        var status = _ref5.status,
+            data = _ref5.data;
+
+        console.log('LIST', data);
     }).catch(function (error) {
         console.log(error);
     });

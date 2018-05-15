@@ -7,10 +7,10 @@ var app = express();
 
 
 app.get('/', function (req, res) {
-  return res.send('Hello');
+  return res.send('Hello, Nokia Microservice for Cankado Here!!');
 });
-app.get('/1', function (req, res) {
-  return (0, _views.getAuthUrl)(req, res);
+app.get('/1/:canuser/', function (req, res) {
+  return (0, _views.getAuthUrl)(req, res, req.params.canuser);
 });
 app.get('/2/:canuser/', function (req, res) {
   return (0, _views.getDataToken)(req, res, req.params.canuser);
