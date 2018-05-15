@@ -150,9 +150,9 @@ export function getMeasure(token, successCallback) {
         action: 'getmeas',
         meastype: '12'
     };
-    if(token.lastupdate){
-        additional_params.lastupdate = token.lastupdate
-    }
+    // if(token.lastupdate){
+    //     additional_params.lastupdate = token.lastupdate
+    // }
     var baseString = getBaseString(["GET", config.REQUEST_TEMP_TOKEN_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     
     var oAuthSecret = SECRET + "&" + token.access_token_secret
@@ -193,7 +193,6 @@ export function setNotification(token) {
         userid: token.userid,
         action: 'subscribe',
         callbackurl: encodeURIComponent(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/'),
-
         comment: 'test',
         //appli: 12
     };

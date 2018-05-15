@@ -62,7 +62,6 @@ export const getDataToken = (req, res, cankado_user) => {
             const{ nokia_user, cankado_user } = user
             setNotification({access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user})
             res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
-          res.send(' OK')
         }).catch((e) => {
             console.log(e)
             res.send('NOT OK')
@@ -71,19 +70,23 @@ export const getDataToken = (req, res, cankado_user) => {
 }
 
 function updateDB(cankado_user, {timezone, results}) {
+    if(results.length) {
+        const dq = `delete from nokia_nokiareading;`
+    }
+    let inserts = []
     results.map(r => {
         console.log(r.dateTime);
         const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
         const { value } = r;
-        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\');`
-        client.query(
-            q,[],
-            (err, res) => {
-            console.log(err ? err.stack : 'Inserted')
-        })
+        inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
     })
-    
-    
+    const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}`
+    console.log(q)
+    client.query(
+        q,[],
+        (err, res) => {
+        console.log(err ? err.stack : 'Inserted')
+    })
 }
 
 export const getTemperature = (req, res, cankado_user) => {
