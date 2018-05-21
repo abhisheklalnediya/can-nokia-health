@@ -53,7 +53,6 @@ var client = new _pg.Client({
 client.connect();
 
 var getAuthUrl = exports.getAuthUrl = function getAuthUrl(req, res, cankado_user) {
-    // var cankado_user = config.CANKADO_USER;
     (0, _nokia.getToken)(cankado_user, function (_ref) {
         var url = _ref.url,
             token = _ref.token;
@@ -62,9 +61,7 @@ var getAuthUrl = exports.getAuthUrl = function getAuthUrl(req, res, cankado_user
         if (!user) {
             user = DB_AUTHS.insert({ cankado_user: cankado_user });
         }
-        console.log(user);
         DB_AUTHS.update(_extends({}, user, token, { cankado_user: cankado_user }));
-        console.log('KKKKKKK', _extends({}, user, token, { cankado_user: cankado_user }));
         var results = DB_AUTHS.find();
         res.redirect(url);
     }, function () {
@@ -80,12 +77,15 @@ var getDataToken = exports.getDataToken = function getDataToken(req, res, cankad
         oauth_verifier = _req$query.oauth_verifier,
         userid = _req$query.userid;
 
+    if (!userid) {
+        res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+        return;
+    }
     user = DB_AUTHS.update(_extends({}, user, {
         user_token: oauth_token,
         user_token_verifier: oauth_verifier,
         nokia_user: userid
     }));
-    console.log('UUU', user);
     (0, _nokia.getAccessToken)(oauth_token, user.oauth_token_secret, function (_ref2) {
         var oauth_token = _ref2.oauth_token,
             oauth_token_secret = _ref2.oauth_token_secret;
@@ -95,7 +95,6 @@ var getDataToken = exports.getDataToken = function getDataToken(req, res, cankad
             access_token_secret: oauth_token_secret
 
         }));
-        console.log('PPPP', oauth_token, oauth_token_secret);
         _axios2.default.get('' + _config2.default.CANKADO_AUTH + user.cankado_user + '/?userid=' + userid).then(function (d) {
             var _user = user,
                 nokia_user = _user.nokia_user,
@@ -125,7 +124,6 @@ function updateDB(cankado_user, _ref3) {
             inserts.push(' (TIMESTAMP \'' + dateTime + '\', ' + value + ', \'' + cankado_user + '\', \'' + String((0, _v2.default)()) + '\', \'t\')');
         });
         var q = 'insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ' + inserts.join(',') + '; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"';
-        console.log(q);
         client.query(q, [], function (err, res) {
             console.log(err ? err.stack : 'Inserted');
         });
@@ -134,7 +132,6 @@ function updateDB(cankado_user, _ref3) {
 
 var getTemperature = exports.getTemperature = function getTemperature(req, res, cankado_user) {
     var user = DB_AUTHS.findOne({ cankado_user: cankado_user });
-    console.log(user);
     var access_token = user.access_token,
         access_token_secret = user.access_token_secret,
         nokia_user = user.nokia_user,

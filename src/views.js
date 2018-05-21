@@ -40,6 +40,7 @@ export const getAuthUrl = (req, res, cankado_user) => {
 export const getDataToken = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
     const { oauth_token, oauth_verifier, userid} = req.query;
+    console.log('hererer')
     if(!userid) {
         res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
         return;

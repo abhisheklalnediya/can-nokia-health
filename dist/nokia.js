@@ -66,7 +66,6 @@ function genQueryString(input_params) {
         }
     }
     query_string = query_string.join('&');
-    console.log(query_string);
     return query_string;
 }
 
@@ -177,19 +176,15 @@ function getMeasure(token, successCallback) {
     var oAuthSecret = SECRET + "&" + token.access_token_secret;
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url);
     axios.get(request_url).then(function (_ref3) {
         var status = _ref3.status,
             data = _ref3.data;
 
         var results = [];
-        console.log(data);
         data.body.measuregrps.map(function (x) {
             var v = null;
-            //console.log(x.grpid)
             x.measures.map(function (y) {
                 if (y.type === 71) {
-                    console.log(x.date, y);
                     v = y.value * Math.pow(10, y.unit);
                 }
             });
@@ -217,25 +212,19 @@ function setNotification(token) {
         comment: 'test'
         //appli: 12
     };
-    console.log(additional_params);
-    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     var oAuthSecret = SECRET + "&" + token.access_token_secret;
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url);
     axios.get(request_url).then(function (_ref4) {
         var status = _ref4.status,
             data = _ref4.data;
-
-        console.log('NOTIFYYYYY', data);
     }).catch(function (error) {
         console.log(error);
     });
 }
 
 function listNotification(token) {
-    console.log(token);
     var default_params = getDefaultParams();
     var additional_params = {
         token: token.access_token,
@@ -243,18 +232,13 @@ function listNotification(token) {
         action: 'list'
         //appli: 12
     };
-    console.log(additional_params);
-    console.log(config.CAN_NOKIA_DOMAIN + '/3/' + token.cankado_user + '/');
     var baseString = getBaseString(["GET", config.REQUEST_NOTIFY_BASE, genQueryString(Object.assign(default_params, additional_params))]);
     var oAuthSecret = SECRET + "&" + token.access_token_secret;
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_NOTIFY_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
-    console.log(request_url);
     axios.get(request_url).then(function (_ref5) {
         var status = _ref5.status,
             data = _ref5.data;
-
-        console.log('LISTTTTTTTT', data);
     }).catch(function (error) {
         console.log(error);
     });
