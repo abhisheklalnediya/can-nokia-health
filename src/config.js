@@ -9,6 +9,7 @@ const config = {
     CAN_NOKIA_DOMAIN: "http://nokia.kraftvoll.co",
     CANKADO_AUTH: "http://iapi.kraftvoll.co/nokia/auth/",
     CANKADO_NOTIFY: "http://nokia.kraftvoll.co:3000/3/",
+    
 }
 
 module.exports = config;
