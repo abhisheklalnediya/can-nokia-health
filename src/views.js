@@ -15,7 +15,7 @@ setTimeout(()=>{
 
 const client = new Client({
     user: 'postgres',
-    host: 'iapi.kraftvoll.co',
+    host: 'ssh.kraftvoll.co',
     database: 'cankadoREST',
     password: '123456',
     port: 5432,
