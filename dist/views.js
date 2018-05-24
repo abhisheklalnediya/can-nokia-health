@@ -45,7 +45,7 @@ setTimeout(function () {
 
 var client = new _pg.Client({
     user: 'postgres',
-    host: 'iapi.kraftvoll.co',
+    host: 'ssh.kraftvoll.co',
     database: 'cankadoREST',
     password: '123456',
     port: 5432
@@ -77,8 +77,9 @@ var getDataToken = exports.getDataToken = function getDataToken(req, res, cankad
         oauth_verifier = _req$query.oauth_verifier,
         userid = _req$query.userid;
 
+    console.log('hererer');
     if (!userid) {
-        res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+        res.redirect(_config2.default.CANKADO_DOMAIN + '/patient/#/patient/devices/nokia');
         return;
     }
     user = DB_AUTHS.update(_extends({}, user, {
@@ -101,7 +102,7 @@ var getDataToken = exports.getDataToken = function getDataToken(req, res, cankad
                 cankado_user = _user.cankado_user;
 
             (0, _nokia.setNotification)({ access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user: cankado_user });
-            res.redirect('http://npat.kraftvoll.co/patient/#/patient/devices/nokia');
+            res.redirect(_config2.default.CANKADO_DOMAIN + '/patient/#/patient/devices/nokia');
             //res.send('OK');
         }).catch(function (e) {
             console.log(e);
