@@ -17,18 +17,15 @@ export default function getMeasure(token, successCallback) {
     const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
-     console.log(data)
         const results = [];
-        data.body.measuregrps.map((x) => {
-            let v = null;
-            x.measures.map((y) => {
+        data.body.measuregrps.forEach((x) => {
+            x.measures.forEach((y) => {
+                let v = null;
                 if (y.type === 71) {
                     v = y.value * Math.pow(10, y.unit);
                 }
+                results.push({ dateTime: x.date, type: y.type, value: v });
             });
-            if (v) {
-                results.push({ dateTime: x.date, value: v });
-            }
         });
         successCallback({
             timezone: data.body.timezone,

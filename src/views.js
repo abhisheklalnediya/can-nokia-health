@@ -77,12 +77,13 @@ export const getDataToken = (req, res, cankado_user) => {
 function updateDB(cankado_user, { timezone, results }) {
     if (results.length) {
         const inserts = [];
-        results.map((r) => {
+        results.forEach((r) => {
             const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
-            const { value } = r;
-            inserts.push(` (TIMESTAMP \'${dateTime}\', ${value}, \'${cankado_user}\', \'${String(uuid())}\', \'t\')`)
+            const { value, type } = r;
+            console.log(r)
+            inserts.push(` (TIMESTAMP '${dateTime}', ${type}, ${value}, '${cankado_user}', '${String(uuid())}', 't')`);
         });
-        const q = `insert into nokia_nokiareading ("dateTime", value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."uuid" < "nb"."uuid"`;
+        const q = `insert into nokia_nokiareading ("dateTime", type ,value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."type" = "nb"."type" and "na"."uuid" < "nb"."uuid"`;
         client.query(
             q, [],
             (err) => { console.log(err ? err.stack : 'Inserted'); },
