@@ -3,8 +3,9 @@ import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString
 import config from '../config';
 
 const REQUEST_MEASURE_BASE = 'http://api.health.nokia.com/measure';
+const REQUEST_WORKOUT_BASE = 'http://api.health.nokia.com/measure';
 
-function processResult({ body }) {
+function processMeasures({ body }) {
     const results = [];
     body.measuregrps.forEach((x) => {
         x.measures.forEach((y) => {
@@ -15,6 +16,19 @@ function processResult({ body }) {
     return results;
 }
 
+function processWorkout({ body }) {
+    console.log(body.more)
+    console.log(body.series)
+    // const results = [];
+    // body.measuregrps.forEach((x) => {
+    //     x.measures.forEach((y) => {
+    //         const value = y.value * (10 ** y.unit);
+    //         results.push({ dateTime: x.date, type: y.type, value });
+    //     });
+    // });
+    // return results;
+}
+
 function getWorkout(token, successCallback) {
     const defaultParams = getDefaultParams();
     const additionalParams = {
@@ -23,14 +37,14 @@ function getWorkout(token, successCallback) {
         action: 'getworkouts',
         // meastype: '71',
     };
-    const baseString = getBaseString(['GET', REQUEST_MEASURE_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
+    const baseString = getBaseString(['GET', REQUEST_WORKOUT_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
     const oAuthSecret = `${config.SECRET}&${token.access_token_secret}`;
     defaultParams.signature = getBaseSrtingSignature(baseString, oAuthSecret);
     const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
-        const results = processResult(data);
-        console.log(results)
+        const results = processWorkout(data);
+        // console.log(results)
     }).catch((error) => {
         console.log(error);
     });
@@ -52,7 +66,7 @@ export default function getMeasure(token, successCallback) {
     const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
-        const results = processResult(data);
+        const results = processMeasures(data);
         successCallback({
             timezone: data.body.timezone,
             results,
