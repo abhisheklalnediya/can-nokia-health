@@ -156,6 +156,8 @@ export function getMeasure(token, successCallback) {
     var oAuthSecret = SECRET + "&" + token.access_token_secret
     default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
     var request_url = config.REQUEST_TEMP_TOKEN_BASE + "?" + genQueryString(Object.assign(default_params, additional_params));
+    console.log(request_url)   
+return 
     axios.get(request_url).then(function({ status, data }){
         const results = []
         data.body.measuregrps.map(x => {
