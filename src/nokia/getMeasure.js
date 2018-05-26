@@ -15,7 +15,7 @@ function processResult({ body }) {
     return results;
 }
 
-export default function getWorkout(token, successCallback) {
+function getWorkout(token, successCallback) {
     const defaultParams = getDefaultParams();
     const additionalParams = {
         token: token.access_token,
