@@ -9,7 +9,7 @@ export default function getMeasure(token, successCallback) {
         token: token.access_token,
         userid: token.userid,
         action: 'getmeas',
-        meastype: '71',
+        // meastype: '71',
     };
     const baseString = getBaseString(['GET', REQUEST_MEASURE_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
     const oAuthSecret = `${config.SECRET}&${token.access_token_secret}`;
@@ -20,11 +20,8 @@ export default function getMeasure(token, successCallback) {
         const results = [];
         data.body.measuregrps.forEach((x) => {
             x.measures.forEach((y) => {
-                let v = null;
-                if (y.type === 71) {
-                    v = y.value * Math.pow(10, y.unit);
-                }
-                results.push({ dateTime: x.date, type: y.type, value: v });
+                const value = y.value * Math.pow(10, y.unit);
+                results.push({ dateTime: x.date, type: y.type, value });
             });
         });
         successCallback({
