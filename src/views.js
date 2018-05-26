@@ -80,7 +80,6 @@ function updateDB(cankado_user, { timezone, results }) {
         results.forEach((r) => {
             const dateTime = `${moment(r.dateTime * 1000).format('YYYY-MM-DD HH:mm:ss')} ${timezone}`;
             const { value, type } = r;
-            console.log(r)
             inserts.push(` (TIMESTAMP '${dateTime}', ${type}, ${value}, '${cankado_user}', '${String(uuid())}', 't')`);
         });
         const q = `insert into nokia_nokiareading ("dateTime", type ,value, patient_id, uuid, active) values ${inserts.join(',')}; delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."type" = "nb"."type" and "na"."uuid" < "nb"."uuid"`;
