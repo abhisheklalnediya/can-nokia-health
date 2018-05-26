@@ -1,0 +1,38 @@
+import axios from 'axios';
+import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString } from './utils';
+import config from '../config';
+
+export default function getMeasure(token, successCallback) {
+    const defaultParams = getDefaultParams();
+    const additionalParams = {
+        token: token.access_token,
+        userid: token.userid,
+        action: 'getmeas',
+        meastype: '71',
+    };
+    const baseString = getBaseString(['GET', config.REQUEST_TEMP_TOKEN_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
+    const oAuthSecret = `${config.SECRET}&${token.access_token_secret}`;
+    defaultParams.signature = getBaseSrtingSignature(baseString, oAuthSecret);
+    const requestUrl = `${config.REQUEST_TEMP_TOKEN_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
+
+    axios.get(requestUrl).then(({ data }) => {
+        const results = [];
+        data.body.measuregrps.map((x) => {
+            let v = null;
+            x.measures.map((y) => {
+                if (y.type === 71) {
+                    v = y.value * Math.pow(10, y.unit);
+                }
+            });
+            if (v) {
+                results.push({ dateTime: x.date, value: v });
+            }
+        });
+        successCallback({
+            timezone: data.body.timezone,
+            results
+        });
+    }).catch((error) => {
+        console.log(error);
+    });
+}
