@@ -17,6 +17,7 @@ export default function getMeasure(token, successCallback) {
     const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
+     console.log(data)
         const results = [];
         data.body.measuregrps.map((x) => {
             let v = null;

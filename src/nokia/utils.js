@@ -1,12 +1,12 @@
-const crypto = require('crypto');
-const CryptoJS = require('crypto-js');
-const config = require('../config');
+import  crypto from 'crypto';
+import CryptoJS from 'crypto-js';
+import  config from '../config';
 
 const {
     KEY,
     SECRET,
 } = config;
-
+console.log(KEY, SECRET, config)
 const REQUEST_AUTHORIZATION_BASE = 'https://developer.health.nokia.com/account/authorize';
 
 export function sortObject(o) {

@@ -51,7 +51,7 @@ export const getDataToken = (req, res, cankado_user) => {
         user_token_verifier: oauth_verifier,
         nokia_user: userid
     });
-    getAccessToken(oauth_token, user.oauth_token_secret, nokia_user, ({oauth_token, oauth_token_secret})=>{
+    getAccessToken(oauth_token, user.oauth_token_secret, userid, ({oauth_token, oauth_token_secret})=>{
         DB_AUTHS.update({
             ...user,
             access_token: oauth_token,
