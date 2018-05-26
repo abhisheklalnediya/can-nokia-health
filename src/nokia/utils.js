@@ -3,10 +3,11 @@ const CryptoJS = require('crypto-js');
 const config = require('../config');
 
 const {
-    REQUEST_AUTHORIZATION_BASE,
     KEY,
     SECRET,
 } = config;
+
+const REQUEST_AUTHORIZATION_BASE = 'https://developer.health.nokia.com/account/authorize';
 
 function sortObject(o) {
     const sorted = {};
@@ -28,16 +29,16 @@ function genQueryString(input_params) {
     var params = sortObject(input_params);
     var query_string = [];
     for ( var param in params ) {
-        if (    param.indexOf("action") == -1 && 
-                param.indexOf("user_id") == -1 && 
-                param.indexOf("callbackurl") == -1 && 
-                param.indexOf("start") == -1 && 
-                param.indexOf("lastupdate") == -1 && 
-                param.indexOf("end") == -1
+        if (    param.indexOf('action') == -1 && 
+                param.indexOf('user_id') == -1 && 
+                param.indexOf('callbackurl') == -1 && 
+                param.indexOf('start') == -1 && 
+                param.indexOf('lastupdate') == -1 && 
+                param.indexOf('end') == -1
             ) { 
-            query_string.push("oauth_" + param + "=" + params[param]); 
+            query_string.push('oauth_' + param + '=' + params[param]); 
         } else {
-            query_string.push(param + "=" + params[param]);
+            query_string.push(param + '=' + params[param]);
         } 
     }
     query_string = query_string.join('&')
@@ -47,7 +48,7 @@ function genQueryString(input_params) {
 
 
 function getBaseString(arr) {
-    const arr1 = arr.map(x => require("querystring").escape(x))
+    const arr1 = arr.map(x => require('querystring').escape(x))
     return arr1.join('&');
 }
 
@@ -60,14 +61,14 @@ function getBaseSrtingSignature(baseString, oAuthSecret) {
 
 export function getAuthorizationURL(token) {
     const default_params = getDefaultParams();
-    default_params["token"] = token.oauth_token
+    default_params['token'] = token.oauth_token
     const baseString = getBaseString(['GET', REQUEST_AUTHORIZATION_BASE, genQueryString(default_params)])
-    const oAuthSecret = SECRET + "&" + token.oauth_token_secret;
+    const oAuthSecret = SECRET + '&' + token.oauth_token_secret;
     
-    default_params["signature"] = getBaseSrtingSignature(baseString, oAuthSecret);
+    default_params['signature'] = getBaseSrtingSignature(baseString, oAuthSecret);
 
-    const request_url = REQUEST_AUTHORIZATION_BASE + "?" + genQueryString(default_params);
-    console.log("Go to this URL:")
+    const request_url = REQUEST_AUTHORIZATION_BASE + '?' + genQueryString(default_params);
+    console.log('Go to this URL:')
     console.log(request_url)
     return request_url;
 }
@@ -77,7 +78,7 @@ export function getDefaultParams() {
         nonce: crypto.randomBytes(16).toString('hex'),
         timestamp: Math.floor(new Date() / 1000),
         consumer_key: KEY,
-        signature_method: "HMAC-SHA1",
-        version: "1.0",
+        signature_method: 'HMAC-SHA1',
+        version: '1.0',
     }
 }

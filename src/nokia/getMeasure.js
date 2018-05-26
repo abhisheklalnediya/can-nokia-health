@@ -2,6 +2,7 @@ import axios from 'axios';
 import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString } from './utils';
 import config from '../config';
 
+const REQUEST_MEASURE_BASE = 'http://api.health.nokia.com/measure';
 export default function getMeasure(token, successCallback) {
     const defaultParams = getDefaultParams();
     const additionalParams = {
@@ -10,10 +11,10 @@ export default function getMeasure(token, successCallback) {
         action: 'getmeas',
         meastype: '71',
     };
-    const baseString = getBaseString(['GET', config.REQUEST_TEMP_TOKEN_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
+    const baseString = getBaseString(['GET', REQUEST_MEASURE_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
     const oAuthSecret = `${config.SECRET}&${token.access_token_secret}`;
     defaultParams.signature = getBaseSrtingSignature(baseString, oAuthSecret);
-    const requestUrl = `${config.REQUEST_TEMP_TOKEN_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
+    const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
         const results = [];
@@ -30,7 +31,7 @@ export default function getMeasure(token, successCallback) {
         });
         successCallback({
             timezone: data.body.timezone,
-            results
+            results,
         });
     }).catch((error) => {
         console.log(error);
