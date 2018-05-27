@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Client } from 'pg';
 import moment from 'moment';
+import uuid from 'uuid/v4';
 import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString } from './utils';
 import config from '../config';
 
@@ -16,19 +17,20 @@ const client = new Client({
 });
 client.connect();
 
-function updateDBWorkout(cankado_user, { results }) {
+function updateDBWorkout(cankado_user, results) {
     if (results.length) {
         const inserts = [];
         results.forEach((r) => {
             const startDateTime = `${moment(r.startdate * 1000).format('YYYY-MM-DD HH:mm:ss')} ${r.timezone}`;
             const endDateTime = `${moment(r.enddate * 1000).format('YYYY-MM-DD HH:mm:ss')} ${r.timezone}`;
-            const { calories, distance, steps, type } = r;
-            inserts.push(` (TIMESTAMP '${startDateTime}', TIMESTAMP '${endDateTime}', ${type}, ${calories}, ${steps}, ${distance}, '${cankado_user}', '${String(uuid())}', 't')`);
+            const { calories, distance, steps, category } = r;
+            inserts.push(` (TIMESTAMP '${startDateTime}', TIMESTAMP '${endDateTime}', ${category}, ${calories}, ${steps}, ${distance}, '${cankado_user}', '${String(uuid())}', 't')`);
         });
         const q = `insert into nokia_nokiaworkoutreading
-            (startDateTime, endDateTime, type, calories, steps, distance, patient_id, uuid, active) values 
+            ("startDateTime", "endDateTime", type, calories, steps, distance, patient_id, uuid, active) values 
             ${inserts.join(',')};
             delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."type" = "nb"."type" and "na"."uuid" < "nb"."uuid"`;
+ console.log(q)
         client.query(
             q, [],
             (err) => { console.log(err ? err.stack : 'Inserted Workout'); },
