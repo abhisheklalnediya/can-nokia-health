@@ -20,14 +20,27 @@ function processMeasures({ body }) {
 function processWorkout({ body }) {
     //console.log(body.more)
     //console.log(body)
-    // const results = [];
+    const results = [];
     body.series.forEach((x) => {
-    //     x.measures.forEach((y) => {
-    //         const value = y.value * (10 ** y.unit);
-    //         results.push({ dateTime: x.date, type: y.type, value });
-    //     });
-    
-    console.log(x.category, moment(x.startdate*1000).format(), moment(x.enddate*1000).format(), x.data.calories, x.data.steps, x.distance)
+        //     x.measures.forEach((y) => {
+        //         const value = y.value * (10 ** y.unit);
+        //         results.push({ dateTime: x.date, type: y.type, value });
+        //     });
+        const { category, data } = x;
+        if (!(category in [1, 2, 3])) { // Not Walk, Run, Swim
+            return;
+        }
+        const reading = {
+            category,
+            startdate: x.startdate * 1000,
+            enddate: x.enddate * 1000,
+        };
+
+        if ('calories' in data) reading.calories = data.calories;
+        if ('steps' in data) reading.steps = data.steps;
+        if ('distance' in data) reading.distance = data.distance;
+
+        console.log(reading);
     });
     // return results;
 }
@@ -41,7 +54,7 @@ function getWorkout(token, successCallback, offset) {
         // meastype: '71',
     };
     if (offset) {
-    additionalParams.offset = offset
+        additionalParams.offset = offset;
     }
     const baseString = getBaseString(['GET', REQUEST_WORKOUT_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
     const oAuthSecret = `${config.SECRET}&${token.access_token_secret}`;
@@ -49,11 +62,10 @@ function getWorkout(token, successCallback, offset) {
     const requestUrl = `${REQUEST_WORKOUT_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
- console.log(data)
         const results = processWorkout(data);
         if (data.body.more) {
             getWorkout(token, successCallback, data.body.offset)
-	}
+	    }
         // console.log(results)
     }).catch((error) => {
         console.log(error);
