@@ -76,3 +76,54 @@ export default function getMeasure(token, successCallback) {
     });
     getWorkout(token)
 }
+
+
+
+
+
+// 1 : Walk
+// 2 : Run
+// 3 : Hiking
+// 4 : Staking
+// 5 : BMX
+// 6 : Bicycling
+// 7 : Swim
+// 8 : Surfing
+// 9 : KiteSurfing
+// 10 : Windsurfing
+// 11 : Bodyboard
+// 12 : Tennis
+// 13 : Table Tennis
+// 14: Squash
+// 15 : Badminton
+// 16 : Lift Weights
+// 17 : Calisthenics
+// 18 : Elliptical
+// 19: Pilate
+// 20 : Basketball
+// 21 : Soccer
+// 22 : Football
+// 23 : Rugby
+// 24 : VollyBall
+// 25 : WaterPolo
+// 26 : HorseRiding
+// 27 : Golf
+// 28 : Yoga
+// 29 : Dancing
+// 30 : Boxing
+// 31 : Fencing
+// 32 : Wrestling
+// 33 : Martial Arts
+// 34 : Skiing
+// 35 : SnowBoarding
+// 192 : Handball
+// 29 : Dancing
+// 186 : Base
+// 187 : Rowing
+// 188 : Zumba
+// 191 : Baseball
+// 192 : Handball
+// 193 : Hockey
+// 194 : IceHockey
+// 195 : Climbing
+// 196 : ICeSkating
