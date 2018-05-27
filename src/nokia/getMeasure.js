@@ -1,10 +1,40 @@
 import axios from 'axios';
+import { Client } from 'pg';
+import moment from 'moment';
 import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString } from './utils';
 import config from '../config';
-import moment from 'moment';
 
 const REQUEST_MEASURE_BASE = 'http://api.health.nokia.com/measure';
 const REQUEST_WORKOUT_BASE = 'https://api.health.nokia.com/v2/measure';
+
+const client = new Client({
+    user: 'postgres',
+    host: 'ssh.kraftvoll.co',
+    database: 'cankadoREST',
+    password: '123456',
+    port: 5432,
+});
+client.connect();
+
+function updateDBWorkout(cankado_user, { results }) {
+    if (results.length) {
+        const inserts = [];
+        results.forEach((r) => {
+            const startDateTime = `${moment(r.startdate * 1000).format('YYYY-MM-DD HH:mm:ss')} ${r.timezone}`;
+            const endDateTime = `${moment(r.enddate * 1000).format('YYYY-MM-DD HH:mm:ss')} ${r.timezone}`;
+            const { calories, distance, steps, type } = r;
+            inserts.push(` (TIMESTAMP '${startDateTime}', TIMESTAMP '${endDateTime}', ${type}, ${calories}, ${steps}, ${distance}, '${cankado_user}', '${String(uuid())}', 't')`);
+        });
+        const q = `insert into nokia_nokiaworkoutreading
+            (startDateTime, endDateTime, type, calories, steps, distance, patient_id, uuid, active) values 
+            ${inserts.join(',')};
+            delete from nokia_nokiareading na using nokia_nokiareading nb where "na"."patient_id" = "nb"."patient_id" and "na"."dateTime" = "nb"."dateTime" and "na"."type" = "nb"."type" and "na"."uuid" < "nb"."uuid"`;
+        client.query(
+            q, [],
+            (err) => { console.log(err ? err.stack : 'Inserted Workout'); },
+        );
+    }
+}
 
 function processMeasures({ body }) {
     const results = [];
@@ -18,31 +48,29 @@ function processMeasures({ body }) {
 }
 
 function processWorkout({ body }) {
-    //console.log(body.more)
-    //console.log(body)
     const results = [];
     body.series.forEach((x) => {
         //     x.measures.forEach((y) => {
         //         const value = y.value * (10 ** y.unit);
         //         results.push({ dateTime: x.date, type: y.type, value });
         //     });
-        const { category, data } = x;
-        if (!(category in [1, 2, 3])) { // Not Walk, Run, Swim
+        const { category, data, timezone } = x;
+        if (!(category in [1, 2, 7])) { // Not Walk, Run, Swim
             return;
         }
         const reading = {
             category,
+            timezone,
             startdate: x.startdate * 1000,
             enddate: x.enddate * 1000,
         };
 
-        if ('calories' in data) reading.calories = data.calories;
-        if ('steps' in data) reading.steps = data.steps;
-        if ('distance' in data) reading.distance = data.distance;
-
-        console.log(reading);
+        reading.calories = ('calories' in data) ? data.calories : null;
+        reading.steps = ('steps' in data) ? data.steps : null;
+        reading.distance = ('distance' in data) ? data.distance : null;
+        results.push(reading);
     });
-    // return results;
+    return results;
 }
 
 function getWorkout(token, successCallback, offset) {
@@ -63,14 +91,14 @@ function getWorkout(token, successCallback, offset) {
 
     axios.get(requestUrl).then(({ data }) => {
         const results = processWorkout(data);
+        updateDBWorkout(token.cankado_user, results);
         if (data.body.more) {
-            getWorkout(token, successCallback, data.body.offset)
-	    }
+            getWorkout(token, successCallback, data.body.offset);
+        }
         // console.log(results)
     }).catch((error) => {
         console.log(error);
     });
-    
 }
 
 

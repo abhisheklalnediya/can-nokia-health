@@ -104,6 +104,7 @@ export const getTemperature = (req, res, cankado_user) => {
         access_token_secret,
         userid: nokia_user,
         lastupdate,
+        cankado_user,
     }, (v) => {
         updateDB(cankado_user, v);
         DB_AUTHS.update({
