@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Client } from 'pg';
 import moment from 'moment';
+import uuid from 'uuid/v4';
 import { getDefaultParams, getBaseString, getBaseSrtingSignature, genQueryString } from './utils';
 import config from '../config';
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Client } from 'pg';
-import uuid from 'uuid/v4'; 
+import uuid from 'uuid/v4';
 import moment from 'moment';
 import _ from 'lodash';
 
