@@ -34,14 +34,15 @@ export function genQueryString(input_params) {
                 param.indexOf('callbackurl') == -1 && 
                 param.indexOf('start') == -1 && 
                 param.indexOf('lastupdate') == -1 && 
-                param.indexOf('end') == -1
+                param.indexOf('end') == -1 &&
+                param.indexOf('offset') == -1
             ) { 
             query_string.push('oauth_' + param + '=' + params[param]); 
         } else {
             query_string.push(param + '=' + params[param]);
         } 
     }
-    query_string = query_string.join('&')
+    query_string = query_string.sort().join('&')
     return query_string
 }
 
