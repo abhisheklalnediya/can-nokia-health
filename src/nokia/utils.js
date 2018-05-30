@@ -26,10 +26,10 @@ export function sortObject(o) {
 }
 
 export function genQueryString(input_params) {
-    var params = sortObject(input_params);
-    var query_string = [];
+    const params = sortObject(input_params);
+    let query_string = [];
     for ( var param in params ) {
-        if (    param.indexOf('action') == -1 && 
+        if ( param.indexOf('action') == -1 && 
                 param.indexOf('user_id') == -1 && 
                 param.indexOf('callbackurl') == -1 && 
                 param.indexOf('start') == -1 && 
@@ -42,7 +42,7 @@ export function genQueryString(input_params) {
             query_string.push(param + '=' + params[param]);
         } 
     }
-    query_string = query_string.join('&')
+    query_string = query_string.sort().join('&')
     return query_string
 }
 

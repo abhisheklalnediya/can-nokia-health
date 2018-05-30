@@ -11,13 +11,11 @@ export default function getAccessToken(token, tokenSecret, nokiaUser, successCal
         userid: nokiaUser,
         token,
     };
-
     const baseString = getBaseString(['GET', REQUEST_ACCESS_TOKEN_BASE, genQueryString(Object.assign(defaultParams, additionalParams))]);
     const oAuthSecret = `${config.SECRET}&${tokenSecret}`;
     defaultParams.signature = getBaseSrtingSignature(baseString, oAuthSecret);
     const requestUrl = `${REQUEST_ACCESS_TOKEN_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
-    axios.get(requestUrl).then(({ data }) => {
-	console.log(data)
+    axios.get(requestUrl).then(({ data }) => {	
         const aToken = queryString.parse(data);
         successCallback(aToken);
     }).catch((error) => {
