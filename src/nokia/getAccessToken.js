@@ -17,6 +17,7 @@ export default function getAccessToken(token, tokenSecret, nokiaUser, successCal
     defaultParams.signature = getBaseSrtingSignature(baseString, oAuthSecret);
     const requestUrl = `${REQUEST_ACCESS_TOKEN_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
     axios.get(requestUrl).then(({ data }) => {
+	console.log(data)
         const aToken = queryString.parse(data);
         successCallback(aToken);
     }).catch((error) => {

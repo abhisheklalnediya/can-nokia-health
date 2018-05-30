@@ -42,7 +42,7 @@ export function genQueryString(input_params) {
             query_string.push(param + '=' + params[param]);
         } 
     }
-    query_string = query_string.sort().join('&')
+    query_string = query_string.join('&')
     return query_string
 }
 

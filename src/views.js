@@ -32,7 +32,8 @@ export const getAuthUrl = (req, res, cankadoUser) => {
         }
         DB_AUTHS.update({ ...user, ...token, cankadoUser });
         res.redirect(url);
-    }, () => {
+    }, (e) => {
+	console.log(e)
         res.status(400);
         res.send('Error');
     });
@@ -40,7 +41,11 @@ export const getAuthUrl = (req, res, cankadoUser) => {
 
 export const getDataToken = (req, res, cankado_user) => {
     let user = DB_AUTHS.findOne({ cankado_user });
+    if (user === null) {
+        user = DB_AUTHS.insert({ cankado_user });
+    }
     const { oauth_token, oauth_verifier, userid } = req.query;
+    console.log(user, cankado_user)
     if (!userid) {
         res.redirect(`${config.CANKADO_DOMAIN}/patient/#/patient/devices/nokia`);
         return;
@@ -56,12 +61,13 @@ export const getDataToken = (req, res, cankado_user) => {
         user.oauth_token_secret,
         userid,
         ({ oauth_token, oauth_token_secret }) => {
-            DB_AUTHS.update({
+            user = DB_AUTHS.update({
                 ...user,
                 access_token: oauth_token,
                 access_token_secret: oauth_token_secret,
 
             });
+            console.log(user)
             axios.get(`${config.CANKADO_AUTH}${user.cankado_user}/?userid=${userid}`).then((d) => {
                 // const { nokia_user, cankado_user } = user
                 // setNotification({access_token: oauth_token, access_token_secret: oauth_token_secret, userid: nokia_user, cankado_user})

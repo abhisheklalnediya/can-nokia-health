@@ -163,6 +163,7 @@ export default function getMeasure(token, successCallback) {
     const requestUrl = `${REQUEST_MEASURE_BASE}?${genQueryString(Object.assign(defaultParams, additionalParams))}`;
 
     axios.get(requestUrl).then(({ data }) => {
+        console.log(data)
         const results = processMeasures(data);
         successCallback({
             timezone: data.body.timezone,
